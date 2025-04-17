@@ -90,8 +90,8 @@ async def recommend(ctx):
 
 @bot.command()
 async def fact(ctx):
-    fact = random.choice(music_facts)
-    await ctx.send(f"🎶 Did you know? {fact}")
+    fact = random.choice(fact)  # pick a random fact
+    await ctx.send(fact)
 
 # 🕒 This task runs once every day at a specific time
 @tasks.loop(hours=24)
