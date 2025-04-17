@@ -4,11 +4,10 @@ import random
 import os
 from dotenv import load_dotenv
 import asyncio
-from datetime import datetime
 from flask import Flask
 from threading import Thread
 
-# Load environment variables
+# Load .env variables
 load_dotenv()
 
 intents = discord.Intents.default()
@@ -16,10 +15,9 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Replace with the ID of your actual channel
+# Replace with the actual channel ID where you want the daily facts sent
 DAILY_FACT_CHANNEL_ID = 1362548069626941661
 
-# Full list of music facts (yours + preserved)
 music_facts = [
     "Did you know? The world's longest song is 'The Rise and Fall of Bossanova' by PC III, lasting 13 hours!",
     "The Beatles hold the record for the most No. 1 hits on the Billboard Hot 100 chart.",
@@ -66,7 +64,7 @@ music_facts = [
     "There’s a music genre called 'Pirate Metal' that blends heavy metal with pirate themes and lore!",
     "Beyoncé has won the most Grammy Awards by a female artist, with 28 total wins.",
     "Jimi Hendrix was known for playing his guitar upside down because he was a left-handed player!",
-    "Did you know? The loudest concert ever recorded took place in 1972 by The Who, reaching 126 decibels!"
+    "Did you know? The loudest concert ever recorded took place in 1972 by The Who, reaching 126 decibels!",
 ]
 
 song_recommendations = [
@@ -74,23 +72,22 @@ song_recommendations = [
     "Heat Waves - Glass Animals",
     "Peaches - Justin Bieber",
     "Bad Habit - Steve Lacy",
-    "As It Was - Harry Styles",
-    "Levitating - Dua Lipa",
-    "Sunflower - Post Malone",
+    "Watermelon Sugar - Harry Styles",
+    "Save Your Tears - The Weeknd",
     "Stay - The Kid LAROI & Justin Bieber",
-    "Industry Baby - Lil Nas X & Jack Harlow",
-    "Good 4 U - Olivia Rodrigo",
+    "Sunflower - Post Malone & Swae Lee",
+    "Levitating - Dua Lipa",
     "Shivers - Ed Sheeran",
-    "Running Up That Hill - Kate Bush",
-    "About Damn Time - Lizzo",
-    "Ghost - Justin Bieber",
-    "Golden Hour - JVKE",
-    "Calm Down - Rema & Selena Gomez"
+    "As It Was - Harry Styles",
+    "Die For You - The Weeknd & Ariana Grande",
+    "good 4 u - Olivia Rodrigo",
+    "Late Night Talking - Harry Styles",
+    "Unholy - Sam Smith & Kim Petras",
 ]
 
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user}!')
+    print(f'✅ Logged in as {bot.user.name}')
     if not send_music_fact.is_running():
         send_music_fact.start()
 
@@ -101,12 +98,12 @@ async def hello(ctx):
 @bot.command()
 async def recommend(ctx):
     song = random.choice(song_recommendations)
-    await ctx.send(f"Here's a song you might like: **{song}** 🎶")
+    await ctx.send(f"🎧 You might like: **{song}**")
 
 @bot.command()
 async def fact(ctx):
-    random_fact = random.choice(music_facts)
-    await ctx.send(f"🎶 Music Fact: {random_fact}")
+    fact = random.choice(music_facts)
+    await ctx.send(f"🎶 Did you know? {fact}")
 
 @tasks.loop(hours=24)
 async def send_music_fact():
@@ -114,9 +111,9 @@ async def send_music_fact():
     channel = bot.get_channel(DAILY_FACT_CHANNEL_ID)
     if channel:
         fact = random.choice(music_facts)
-        await channel.send(f"🎶 Daily Music Fact: {fact}")
+        await channel.send(f"🎵 Daily Music Fact: {fact}")
 
-# Replit/Render keep_alive workaround
+# Optional keep_alive webserver (useful for Replit or Render.com)
 app = Flask('')
 
 @app.route('/')
@@ -127,10 +124,10 @@ def run():
     app.run(host='0.0.0.0', port=8080)
 
 def keep_alive():
-    t = Thread(target=run)
-    t.start()
+    thread = Thread(target=run)
+    thread.start()
 
 keep_alive()
 
-# Start the bot
-bot.run(os.getenv("DISCORD_TOKEN"))
+# Start bot
+bot.run(os.getenv("TOKEN"))
