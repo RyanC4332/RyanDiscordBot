@@ -4,11 +4,11 @@ import random
 import os
 from dotenv import load_dotenv
 import asyncio
-from datetime import datetime, time
+from datetime import datetime
 from flask import Flask
 from threading import Thread
-import os
 
+# Load environment variables
 load_dotenv()
 
 intents = discord.Intents.default()
@@ -16,11 +16,11 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Replace with the ID of the channel where you want the bot to post daily facts
-DAILY_FACT_CHANNEL_ID = 1362548069626941661  # ⬅️ Replace this with your real channel ID
+# Replace with the ID of your actual channel
+DAILY_FACT_CHANNEL_ID = 1362548069626941661
 
+# Full list of music facts (yours + preserved)
 music_facts = [
-    
     "Did you know? The world's longest song is 'The Rise and Fall of Bossanova' by PC III, lasting 13 hours!",
     "The Beatles hold the record for the most No. 1 hits on the Billboard Hot 100 chart.",
     "Music can help reduce stress by lowering cortisol levels, according to research.",
@@ -66,13 +66,33 @@ music_facts = [
     "There’s a music genre called 'Pirate Metal' that blends heavy metal with pirate themes and lore!",
     "Beyoncé has won the most Grammy Awards by a female artist, with 28 total wins.",
     "Jimi Hendrix was known for playing his guitar upside down because he was a left-handed player!",
-    "Did you know? The loudest concert ever recorded took place in 1972 by The Who, reaching 126 decibels!",
+    "Did you know? The loudest concert ever recorded took place in 1972 by The Who, reaching 126 decibels!"
+]
+
+song_recommendations = [
+    "Blinding Lights - The Weeknd",
+    "Heat Waves - Glass Animals",
+    "Peaches - Justin Bieber",
+    "Bad Habit - Steve Lacy",
+    "As It Was - Harry Styles",
+    "Levitating - Dua Lipa",
+    "Sunflower - Post Malone",
+    "Stay - The Kid LAROI & Justin Bieber",
+    "Industry Baby - Lil Nas X & Jack Harlow",
+    "Good 4 U - Olivia Rodrigo",
+    "Shivers - Ed Sheeran",
+    "Running Up That Hill - Kate Bush",
+    "About Damn Time - Lizzo",
+    "Ghost - Justin Bieber",
+    "Golden Hour - JVKE",
+    "Calm Down - Rema & Selena Gomez"
 ]
 
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user.name}!')
-    send_daily_fact.start()  # Start the daily task when the bot is ready
+    print(f'Logged in as {bot.user}!')
+    if not send_music_fact.is_running():
+        send_music_fact.start()
 
 @bot.command()
 async def hello(ctx):
@@ -80,38 +100,23 @@ async def hello(ctx):
 
 @bot.command()
 async def recommend(ctx):
-    song = random.choice([
-        "Blinding Lights - The Weeknd",
-        "Heat Waves - Glass Animals",
-        "Peaches - Justin Bieber",
-        "Bad Habit - Steve Lacy"
-    ])
+    song = random.choice(song_recommendations)
     await ctx.send(f"Here's a song you might like: **{song}** 🎶")
 
 @bot.command()
 async def fact(ctx):
-    fact = random.choice(fact)  # pick a random fact
-    await ctx.send(fact)
+    random_fact = random.choice(music_facts)
+    await ctx.send(f"🎶 Music Fact: {random_fact}")
 
 @tasks.loop(hours=24)
 async def send_music_fact():
-    channel = bot.get_channel(1234567890)  # replace with your channel ID
-    fact = random.choice(facts)
-    await channel.send(fact)
-
-@bot.event
-async def on_ready():
-    print(f'Logged in as {bot.user}!')
-    if not send_music_fact.is_running():  # Check if the loop is already running
-        send_music_fact.start()  # Start the loop only if it's not already running
-
-    await asyncio.sleep(delay)
-
+    await bot.wait_until_ready()
     channel = bot.get_channel(DAILY_FACT_CHANNEL_ID)
     if channel:
         fact = random.choice(music_facts)
         await channel.send(f"🎶 Daily Music Fact: {fact}")
 
+# Replit/Render keep_alive workaround
 app = Flask('')
 
 @app.route('/')
@@ -125,7 +130,7 @@ def keep_alive():
     t = Thread(target=run)
     t.start()
 
-
-
 keep_alive()
+
+# Start the bot
 bot.run(os.getenv("DISCORD_TOKEN"))
