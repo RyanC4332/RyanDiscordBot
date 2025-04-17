@@ -93,21 +93,17 @@ async def fact(ctx):
     fact = random.choice(fact)  # pick a random fact
     await ctx.send(fact)
 
-# 🕒 This task runs once every day at a specific time
 @tasks.loop(hours=24)
-async def send_daily_fact():
-    now = datetime.now()
-    target_time = time(16, 0)  # 16:00 = 4pm
-    current_time = now.time()
+async def send_music_fact():
+    channel = bot.get_channel(1234567890)  # replace with your channel ID
+    fact = random.choice(facts)
+    await channel.send(fact)
 
-    if current_time >= target_time:
-        # Wait until the next day to post
-        tomorrow = datetime.combine(now.date(), target_time)
-        tomorrow = tomorrow.replace(day=now.day + 1)
-        delay = (tomorrow - now).total_seconds()
-    else:
-        # Post later today
-        delay = (datetime.combine(now.date(), target_time) - now).total_seconds()
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user}!')
+    if not send_music_fact.is_running():  # Check if the loop is already running
+        send_music_fact.start()  # Start the loop only if it's not already running
 
     await asyncio.sleep(delay)
 
